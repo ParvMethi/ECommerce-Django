@@ -9,6 +9,7 @@ def _cart_id(request):
         cart = request.session.create()
     return cart
 
+
 def add_cart(request, product_id):
     product = Product.objects.get(id = product_id) #getting the product
     try:
@@ -24,6 +25,7 @@ def add_cart(request, product_id):
     cart_item.save()
     return redirect('cart')
     
+
 def remove_cart(request, product_id):
     product = Product.objects.get(id = product_id) #getting the product
     cart = Cart.objects.get(cart_id = _cart_id(request)) #getting the cart
@@ -34,6 +36,7 @@ def remove_cart(request, product_id):
     else:
         cart_item.delete()
     return redirect('cart')
+
 
 def remove_cart_item(request, product_id):
     product = Product.objects.get(id = product_id) #getting the product
@@ -46,6 +49,8 @@ def remove_cart_item(request, product_id):
 
 def cart(request, total = 0, quantity = 0, cart_items = None):
     try:
+        tax = 0
+        grand_total = 0
         cart = Cart.objects.get(cart_id = _cart_id(request))
         cart_items = CartItem.objects.filter(cart = cart, is_active = True)
         for cart_item in cart_items:

@@ -76,6 +76,11 @@ def logout(request):
     return redirect('login')
 
 
+@login_required(login_url=login)
+def dashboard(request):
+    return render(request, 'accounts/dashboard.html')
+
+
 def activate(request, uidb64, token):
     try:
         uid = urlsafe_base64_decode(uidb64).decode()

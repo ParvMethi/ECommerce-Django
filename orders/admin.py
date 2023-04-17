@@ -18,6 +18,10 @@ class OrderAdmin(admin.ModelAdmin):
 class PaymentAdmin(admin.ModelAdmin):
     list_display = ['payment_id', 'user', 'payment_method', 'amount_paid', 'status']
 
+class OrderProductAdmin(admin.ModelAdmin):
+    list_display = ['order', 'user', 'product', 'quantity', 'product_price']
+
+
 admin.site.register(Payment, PaymentAdmin)
 admin.site.register(Order, OrderAdmin)
-admin.site.register(OrderProduct)
+admin.site.register(OrderProduct, OrderProductAdmin)

@@ -32,17 +32,23 @@
 
               <hr>
               <div class="row">
+                {% if single_product.variation_set.colors %}
                 <div class="item-option-select">
+                  
                   <h6>Choose Color</h6>
                     <select name="color" class="form-control" required>
                       <option value="" disabled selected>Choose Color</option>
+                      
                       {% for variation in single_product.variation_set.colors %}
                       <option value="{{variation.variation_value | lower}}">{{variation.variation_value | capfirst}}</option>
                       {% endfor %}
+                      
                     </select>
                 </div>
+                {% endif %}
               </div> <!-- row.// -->
               <div class="row">
+                {% if single_product.variation_set.sizes %}
                 <div class="item-option-select">
                   <h6>Select Size</h6>
                   <select name="size" class="form-control" required>
@@ -52,6 +58,7 @@
                     {% endfor %}
                   </select>
                 </div>
+                {% endif %}
               </div> <!-- row.// -->
               <hr>
               {% if single_product.stock <= 0 %} <h5 class='text-danger'>Out of Stock</h5>

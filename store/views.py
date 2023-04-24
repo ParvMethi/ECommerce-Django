@@ -2,12 +2,13 @@ from django.shortcuts import redirect, render
 from carts.models import CartItem
 from carts.views import _cart_id
 from category.models import Category
+from orders.models import OrderProduct
 from store.forms import ReviewForm
 from .models import Product, ReviewRating
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Q
 from django.contrib import messages
-
+from django.db.models import Avg
 # Create your views here.
 def store(request, category_slug = None):
 
@@ -42,12 +43,32 @@ def product_detail(request, category_slug = None, product_slug = None):
     try:
         single_product = Product.objects.get(category__slug = category_slug, slug = product_slug)
         in_cart = CartItem.objects.filter(product = single_product, cart__cart_id = _cart_id(request)).exists()
-
     except Exception as e:
         raise e
+    
+    if request.user.is_authenticated:
+        try:
+            orderproduct = OrderProduct.objects.filter(user = request.user, product_id = single_product.id).exists()
+        except OrderProduct.DoesNotExist:
+            orderproduct = None
+    else:
+        orderproduct = None
+
+    #Get the reviews
+    reviewratings = ReviewRating.objects.filter(product__id = single_product.id, status = True)
+
+    reviewrating = ReviewRating.objects.filter(product__id = single_product.id, status = True).aggregate(average=Avg('rating'))
+    avg = 0
+    
+    if reviewrating['average'] is not None:
+        avg = float(reviewrating['average'])
+    # print(avg)
     context = {
         'single_product': single_product,
         'in_cart': in_cart,
+        'orderproduct': orderproduct,
+        'reviewratings': reviewratings,
+        'average': avg
     }
     return render(request, 'store/product_detail.html', context)
 
@@ -75,7 +96,6 @@ def submit_review(request, product_id):
                 messages.success(request, 'Thank you! Your review has been submitted.')
                 return redirect(url)
 
-
 def search(request):
     if 'keyword' in request.GET:
         keyword = request.GET['keyword']
@@ -88,3 +108,4 @@ def search(request):
     # print(keyword)
 
     return render(request, 'store/store.html', context)
+

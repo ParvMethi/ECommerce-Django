@@ -18,6 +18,8 @@ from carts.models import Cart, CartItem
 from carts.views import _cart_id
 import requests
 
+from orders.models import Order
+
 # Create your views here.
 def register(request):
     if request.method == 'POST':
@@ -54,6 +56,8 @@ def register(request):
         form = RegistrationForm()
     context = {'form': form}
     return render(request, 'accounts/register.html', context)
+
+
 
 def login(request):
     if request.method == 'POST':
@@ -120,6 +124,7 @@ def login(request):
 
     return render(request, 'accounts/login.html')
 
+
 @login_required(login_url=login)
 def logout(request):
     auth.logout(request)
@@ -129,7 +134,16 @@ def logout(request):
 
 @login_required(login_url=login)
 def dashboard(request):
-    return render(request, 'accounts/dashboard.html')
+    orders = Order.objects.filter(user_id = request.user.id, is_ordered=True)
+    orders_count = orders.count()
+    context = {'orders_count': orders_count}
+    return render(request, 'accounts/dashboard.html', context)
+
+
+def my_orders(request):
+    orders = Order.objects.filter(user_id = request.user.id, is_ordered = True).order_by('-created_at')
+    context = {'orders': orders}
+    return render(request, 'accounts/my_orders.html', context)
 
 
 def forgotPassword(request):
@@ -157,6 +171,7 @@ def forgotPassword(request):
             messages.error(request, 'Account does not exists.')
             return redirect('forgotPassword')
     return render(request, 'accounts/forgotPassword.html')
+
 
 
 def resetpassword_validate(request, uidb64, token):
